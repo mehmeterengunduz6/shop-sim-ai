@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WarpBackground } from "@/components/ui/warp-background";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 
 export default function HomePage() {
   const router = useRouter();
@@ -110,12 +111,12 @@ export default function HomePage() {
 
             {/* URL Input */}
             <form onSubmit={handleSubmit} className="w-full max-w-xl">
-              <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full border border-gray-200 shadow-lg px-5 py-3 transition-all focus-within:ring-2 focus-within:ring-[#f97316]/20">
+              <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full border border-gray-200 shadow-lg px-4 py-2 transition-all focus-within:ring-2 focus-within:ring-[#f97316]/20">
                 {/* Globe Icon */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -134,14 +135,19 @@ export default function HomePage() {
                   placeholder="example-store.com"
                   value={storeUrl}
                   onChange={(e) => setStoreUrl(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-800 text-lg placeholder:text-gray-400"
+                  className="flex-1 bg-transparent outline-none text-gray-800 text-base placeholder:text-gray-400"
                   disabled={isSubmitting}
                 />
 
-                <button
+                <ShimmerButton
                   type="submit"
                   disabled={isSubmitting || !storeUrl}
-                  className="bg-[#f97316] hover:bg-[#ea580c] disabled:bg-[#fdba74] text-white font-medium px-6 py-2.5 rounded-full transition-colors flex-shrink-0"
+                  className="text-white font-medium shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed py-2 px-5 h-auto text-sm"
+                  background="rgba(249, 115, 22, 1)"
+                  shimmerColor="#ffffff"
+                  shimmerSize="2px"
+                  shimmerDuration="3s"
+                  borderRadius="100px"
                 >
                   {isSubmitting ? (
                     <svg
@@ -165,9 +171,9 @@ export default function HomePage() {
                       />
                     </svg>
                   ) : (
-                    'Analyze Store'
+                    <span className="whitespace-nowrap">Analyze Store</span>
                   )}
-                </button>
+                </ShimmerButton>
               </div>
 
               {error && (
