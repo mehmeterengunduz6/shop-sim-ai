@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 interface Finding {
   id: string;
-  category: 'critical' | 'warning' | 'suggestion';
+  category: 'critical' | 'warning' | 'suggestion' | 'positive';
   title: string;
   description: string;
   evidence: string;
@@ -29,6 +29,7 @@ interface RunResult {
     add_to_cart_success: boolean;
     time_to_add_to_cart_seconds: number | null;
     checkout_reached: boolean;
+    checkout_form_filled: boolean;
     drop_off_step: string | null;
   };
   findings?: Finding[];
@@ -171,7 +172,7 @@ export default function RunPage() {
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white rounded-xl p-4 shadow">
             <div className={`text-2xl font-semibold ${metrics?.add_to_cart_success ? 'text-green-500' : 'text-red-500'}`}>
               {metrics?.add_to_cart_success ? '✓' : '✗'}
@@ -194,6 +195,13 @@ export default function RunPage() {
           </div>
           
           <div className="bg-white rounded-xl p-4 shadow">
+            <div className={`text-2xl font-semibold ${metrics?.checkout_form_filled ? 'text-green-500' : 'text-red-500'}`}>
+              {metrics?.checkout_form_filled ? '✓' : '✗'}
+            </div>
+            <p className="text-gray-500 text-sm">Form Filled</p>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 shadow">
             <div className="text-2xl font-semibold text-gray-900">
               {metrics?.drop_off_step ?? 'None'}
             </div>
@@ -201,41 +209,73 @@ export default function RunPage() {
           </div>
         </div>
 
-        {/* Findings */}
+        {/* Findings - Grouped by category */}
         {findings && findings.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Findings</h2>
-            <div className="space-y-4">
-              {findings.map((finding) => (
-                <div
-                  key={finding.id}
-                  className={`p-4 rounded-lg border-l-4 ${
-                    finding.category === 'critical' ? 'bg-red-50 border-red-500' :
-                    finding.category === 'warning' ? 'bg-yellow-50 border-yellow-500' :
-                    'bg-green-50 border-green-500'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className={`text-xs font-medium uppercase ${
-                        finding.category === 'critical' ? 'text-red-600' :
-                        finding.category === 'warning' ? 'text-yellow-600' :
-                        'text-green-600'
-                      }`}>
-                        {finding.category}
-                      </span>
-                      <h3 className="font-medium text-gray-900 mt-1">{finding.title}</h3>
+          <div className="space-y-6 mb-6">
+            {/* Positive findings first */}
+            {findings.filter(f => f.category === 'positive').length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-green-500">✓</span> What&apos;s Working Well
+                </h2>
+                <div className="space-y-3">
+                  {findings.filter(f => f.category === 'positive').map((finding) => (
+                    <div
+                      key={finding.id}
+                      className="p-4 rounded-lg bg-green-50 border-l-4 border-green-500"
+                    >
+                      <h3 className="font-medium text-gray-900">{finding.title}</h3>
                       <p className="text-gray-600 text-sm mt-1">{finding.description}</p>
                     </div>
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-sm text-gray-500">
-                      <span className="font-medium">Recommendation:</span> {finding.recommendation}
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Issues and Suggestions */}
+            {findings.filter(f => f.category !== 'positive').length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-orange-500">⚡</span> Issues & Recommendations
+                </h2>
+                <div className="space-y-4">
+                  {/* Critical issues first, then warnings, then suggestions */}
+                  {['critical', 'warning', 'suggestion'].map(category => 
+                    findings
+                      .filter(f => f.category === category)
+                      .map((finding) => (
+                        <div
+                          key={finding.id}
+                          className={`p-4 rounded-lg border-l-4 ${
+                            finding.category === 'critical' ? 'bg-red-50 border-red-500' :
+                            finding.category === 'warning' ? 'bg-yellow-50 border-yellow-500' :
+                            'bg-blue-50 border-blue-500'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <span className={`text-xs font-medium uppercase ${
+                                finding.category === 'critical' ? 'text-red-600' :
+                                finding.category === 'warning' ? 'text-yellow-600' :
+                                'text-blue-600'
+                              }`}>
+                                {finding.category === 'suggestion' ? 'optimization' : finding.category}
+                              </span>
+                              <h3 className="font-medium text-gray-900 mt-1">{finding.title}</h3>
+                              <p className="text-gray-600 text-sm mt-1">{finding.description}</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-sm text-gray-500">
+                              <span className="font-medium">Recommendation:</span> {finding.recommendation}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
