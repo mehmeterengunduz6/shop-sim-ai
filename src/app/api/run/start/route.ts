@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Generate a unique run ID
     const runId = randomUUID();
-    
+
     // Store initial status
     resultsStore.set(runId, { status: 'running' });
 
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       })
       .catch((error) => {
         console.error(`Analysis failed for run_id: ${runId}`, error);
-        resultsStore.set(runId, { 
-          status: 'failed', 
+        resultsStore.set(runId, {
+          status: 'failed',
           result: {
             run_id: runId,
             store_url,
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
               add_to_cart_success: false,
               time_to_add_to_cart_seconds: null,
               checkout_reached: false,
+              checkout_form_filled: false,
               drop_off_step: 'initialization',
             },
             findings: [{
